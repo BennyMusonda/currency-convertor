@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Rates & Converter</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .bg-pattern {
+            background-color: #f3f4f6;
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px), radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+    </style>
+</head>
+<body class="bg-pattern min-h-screen p-4 flex flex-col items-center">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-md p-4 mb-8 rounded-2xl w-full max-w-4xl flex justify-between items-center">
+        <!-- Logo -->
+        <div class="flex items-center">
+            <span class="text-2xl font-bold text-indigo-600">Francify Rates</span>
+        </div>
+        <!-- Navbar Buttons -->
+        <div class="space-x-4 text-gray-700 font-medium">
+            <!-- Added IDs to the links for JavaScript to control them -->
+            <a href="#" id="ratesLink" class="hover:text-indigo-600 transition duration-150 ease-in-out">Rates</a>
+            <a href="#" id="converterLink" class="hover:text-indigo-600 transition duration-150 ease-in-out">Converter</a>
+            <a href="#" id="aboutLink" class="hover:text-indigo-600 transition duration-150 ease-in-out">About</a>
+        </div>
+    </nav>
+    
+    <!-- Main content container - This now holds both the converter and rates -->
+    <div id="mainContent" class="max-w-4xl w-full bg-white shadow-xl rounded-2xl overflow-hidden md:flex md:flex-row-reverse mb-8">
+        
+        <!-- Right Section: Currency Rates Display -->
+        <div class="md:w-1/2 p-8 bg-gray-100 flex flex-col justify-center">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 text-center">Live Exchange Rates</h1>
+            <div id="loadingRates" class="text-center text-gray-500 font-medium">
+                Fetching the latest rates...
+            </div>
+            <div id="rateDisplay" class="space-y-4 hidden">
+                <!-- Rates will be injected here by JavaScript -->
+            </div>
+            <div id="errorMessageRates" class="hidden text-center text-red-500 font-medium mt-4">
+                Failed to load rates. Please try again later.
+            </div>
+        </div>
+
+        <!-- Left Section: Currency Converter -->
+        <div class="md:w-1/2 p-8 flex flex-col justify-center">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">Currency Converter</h2>
+
+            <div class="space-y-6">
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700">Amount</label>
+                    <input type="number" id="amount" value="1" min="0" step="0.01" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <div class="w-1/2">
+                        <label for="fromCurrency" class="block text-sm font-medium text-gray-700">From</label>
+                        <select id="fromCurrency" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option value="USD">US Dollar (USD)</option>
+                            <option value="ZMW">Zambian Kwacha (ZMW)</option>
+                            <option value="CDF">Congolese Franc (CDF)</option>
+                            <option value="EUR">Euro (EUR)</option>
+                        </select>
+                    </div>
+                    <div class="w-1/2">
+                        <label for="toCurrency" class="block text-sm font-medium text-gray-700">To</label>
+                        <select id="toCurrency" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <option value="ZMW">Zambian Kwacha (ZMW)</option>
+                            <option value="USD">US Dollar (USD)</option>
+                            <option value="CDF">Congolese Franc (CDF)</option>
+                            <option value="EUR">Euro (EUR)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <button id="convertBtn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                        Convert
+                    </button>
+                </div>
+                
+                <div id="result" class="mt-6 text-center text-xl font-bold text-gray-800 p-4 bg-gray-50 rounded-lg hidden">
+                    <!-- Result will be displayed here -->
+                </div>
+                <div id="errorMessageConverter" class="hidden text-center text-red-500 font-medium">
+                    Please enter a valid amount.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New "About" page section -->
+    <!-- This section is hidden by default and will be shown by JavaScript when the About link is clicked -->
+    <div id="aboutPage" class="max-w-4xl w-full bg-white shadow-xl rounded-2xl p-8 hidden">
+        <div class="text-center">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">About Francify</h2>
+            <p class="text-lg text-gray-700 leading-relaxed mb-4">
+                This currency converter is a prototype developed by Francify Technologies for research and learning purposes. Our goal is to create intuitive and useful tools that simplify financial concepts.
+            </p>
+            <p class="text-lg text-gray-700 leading-relaxed">
+                My name is Benny, and I am the founder of Francify. I'm excited to share this project with you as we continue to build and explore new ideas.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-gray-500 text-sm mt-auto mb-4">
+        &copy; 2025 Francify. All rights reserved.
+    </footer>
+
+    <script>
+        // API Configuration
+        const API_URL = 'https://open.er-api.com/v6/latest/USD';
+
+        // DOM Elements
+        const rateDisplay = document.getElementById('rateDisplay');
+        const loadingRates = document.getElementById('loadingRates');
+        const errorMessageRates = document.getElementById('errorMessageRates');
+
+        const amountInput = document.getElementById('amount');
+        const fromCurrencySelect = document.getElementById('fromCurrency');
+        const toCurrencySelect = document.getElementById('toCurrency');
+        const convertBtn = document.getElementById('convertBtn');
+        const resultDiv = document.getElementById('result');
+        const errorMessageConverter = document.getElementById('errorMessageConverter');
+        
+        // New elements for page switching
+        const mainContent = document.getElementById('mainContent');
+        const aboutPage = document.getElementById('aboutPage');
+        const ratesLink = document.getElementById('ratesLink');
+        const converterLink = document.getElementById('converterLink');
+        const aboutLink = document.getElementById('aboutLink');
+
+        // Global variable to store exchange rates
+        let exchangeRates = {};
+
+        /**
+         * Fetches exchange rate data from the API.
+         */
+        async function fetchExchangeRates() {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.result === 'success') {
+                    exchangeRates = data.rates;
+                    loadingRates.classList.add('hidden');
+                    rateDisplay.classList.remove('hidden');
+                    displayDailyRates();
+                } else {
+                    throw new Error('API response was not successful.');
+                }
+            } catch (error) {
+                console.error('Could not fetch exchange rates:', error);
+                loadingRates.classList.add('hidden');
+                errorMessageRates.classList.remove('hidden');
+            }
+        }
+
+        /**
+         * Displays the daily rates for the specified currencies.
+         */
+        function displayDailyRates() {
+            const currenciesToShow = ['ZMW', 'USD', 'CDF', 'EUR'];
+            rateDisplay.innerHTML = ''; // Clear previous rates
+
+            currenciesToShow.forEach(currencyCode => {
+                if (exchangeRates[currencyCode]) {
+                    const rateElement = document.createElement('div');
+                    rateElement.className = 'bg-white p-4 rounded-lg shadow-sm flex justify-between items-center';
+                    
+                    // Add pronunciation note for CDF
+                    const pronunciationNote = currencyCode === 'CDF' ? '<span class="text-sm text-gray-400 mt-1"> (pronounced "franc congolais")</span>' : '';
+
+                    rateElement.innerHTML = `
+                        <span class="text-lg font-semibold text-gray-800">${currencyCode}</span>
+                        <div class="flex flex-col items-end">
+                            <span class="text-lg font-bold text-indigo-600">1 USD = ${exchangeRates[currencyCode].toFixed(2)} ${currencyCode}</span>
+                            ${pronunciationNote}
+                        </div>
+                    `;
+                    rateDisplay.appendChild(rateElement);
+                }
+            });
+        }
+
+        /**
+         * Performs the currency conversion calculation.
+         */
+        function convertCurrency() {
+            const amount = parseFloat(amountInput.value);
+            const fromCurrency = fromCurrencySelect.value;
+            const toCurrency = toCurrencySelect.value;
+
+            // Simple validation
+            if (isNaN(amount) || amount <= 0) {
+                errorMessageConverter.classList.remove('hidden');
+                resultDiv.classList.add('hidden');
+                return;
+            } else {
+                errorMessageConverter.classList.add('hidden');
+            }
+
+            // The API returns rates relative to USD.
+            // To convert from A to B, we first convert A to USD, then USD to B.
+            const rateFrom = exchangeRates[fromCurrency];
+            const rateTo = exchangeRates[toCurrency];
+
+            if (rateFrom && rateTo) {
+                const amountInUSD = amount / rateFrom;
+                const convertedAmount = amountInUSD * rateTo;
+
+                resultDiv.textContent = `${amount.toFixed(2)} ${fromCurrency} = ${convertedAmount.toFixed(2)} ${toCurrency}`;
+                resultDiv.classList.remove('hidden');
+            } else {
+                resultDiv.textContent = "Conversion failed. Rates not available.";
+                resultDiv.classList.remove('hidden');
+            }
+        }
+        
+        // --- Page Switching Logic ---
+        function showMainContent() {
+            mainContent.classList.remove('hidden');
+            aboutPage.classList.add('hidden');
+        }
+
+        function showAboutPage() {
+            mainContent.classList.add('hidden');
+            aboutPage.classList.remove('hidden');
+        }
+
+        // Event Listeners for Navbar Links
+        ratesLink.addEventListener('click', showMainContent);
+        converterLink.addEventListener('click', showMainContent);
+        aboutLink.addEventListener('click', showAboutPage);
+
+
+        // Initial load event listeners
+        window.addEventListener('load', fetchExchangeRates);
+        convertBtn.addEventListener('click', convertCurrency);
+
+        // Optional: Convert on input change
+        amountInput.addEventListener('input', convertCurrency);
+        fromCurrencySelect.addEventListener('change', convertCurrency);
+        toCurrencySelect.addEventListener('change', convertCurrency);
+    </script>
+</body>
+</html>
