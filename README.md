@@ -1,5 +1,5 @@
 # 💱 Francify Rates
-
+## View Live Link [Here](https://bennymusonda.github.io/currency-convertor/)
 A colourful, beginner-friendly currency converter built with plain **HTML, CSS and JavaScript**. It shows live exchange rates and converts between 150+ currencies, with a focus on the Zambian Kwacha (ZMW), Congolese Franc (CDF), US Dollar (USD) and Euro (EUR).
 
 > Prototype by Francify Technologies, made for research and learning.
